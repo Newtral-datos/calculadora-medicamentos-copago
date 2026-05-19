@@ -173,10 +173,14 @@ function onInput() {
   } else {
     const matches = medicamentos
       .map((m, i) => ({ m, i }))
-      .filter(({ m }) => m.medicamento && normalize(m.medicamento).includes(q))
+      .filter(({ m }) => {
+        const nm = m.medicamento ? normalize(m.medicamento) : '';
+        const nn = m.nombre      ? normalize(m.nombre)      : '';
+        return nm.includes(q) || nn.includes(q);
+      })
       .sort((a, b) => {
-        const fa = normalize(a.m.medicamento);
-        const fb = normalize(b.m.medicamento);
+        const fa = normalize(a.m.medicamento || a.m.nombre || '');
+        const fb = normalize(b.m.medicamento || b.m.nombre || '');
         const sa = fa === q ? 0 : fa.startsWith(q) ? 1 : 2;
         const sb = fb === q ? 0 : fb.startsWith(q) ? 1 : 2;
         return sa - sb || a.m.nombre.localeCompare(b.m.nombre);
