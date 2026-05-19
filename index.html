@@ -15,7 +15,7 @@
 
     <header class="hero">
       <h1>Calculadora<br /><em>de copago</em></h1>
-      <p class="hero-sub">Descubre tu aportación real al coste del medicamento<br /><i>(No almacenamos tus datos)</i></p>
+      <p class="hero-sub">Descubre cuánto pagas sobre el coste del medicamento<br /><i>(Newtral no almacena tus datos)</i></p>
     </header>
 
     <!-- Indicador de progreso -->
@@ -61,6 +61,21 @@
           <span class="choice-desc">Jubilado o pensión contributiva</span>
         </label>
       </div>
+
+      <details class="exentos">
+        <summary>Consulta los casos exentos</summary>
+        <ul>
+          <li>Beneficiarios del Ingreso Mínimo Vital (IMV)</li>
+          <li>Desempleados</li>
+          <li>Perceptores de pensiones no contributivas</li>
+          <li>Pensionistas vulnerables</li>
+          <li>Pensionistas ya exentos</li>
+          <li>Afectados de síndrome tóxico y personas con discapacidad</li>
+          <li>Personas en tratamiento derivado de un accidente de trabajo o enfermedad profesional</li>
+          <li>Menores con un grado de discapacidad igual o superior al 33%</li>
+          <li>Personas que reciben una prestación económica de la Seguridad Social por hijo o menor a cargo en régimen de acogimiento familiar permanente o guarda con fines de adopción</li>
+        </ul>
+      </details>
     </section>
 
     <!-- Step 2: Renta -->
@@ -124,7 +139,7 @@
       </div>
 
       <div class="result-hero">
-        <span class="result-eyebrow">Tu aportación por envase</span>
+        <span class="result-eyebrow">Pagas por envase</span>
         <span class="result-amount" id="res-aportacion">—</span>
       </div>
 
@@ -142,14 +157,13 @@
           <span class="detail-value" id="res-pct">—</span>
         </div>
         <div class="detail-row" id="res-tope-row">
-          <span class="detail-label">Límite mensual</span>
+          <span class="detail-label">Límite mensual <span class="info-tip" tabindex="0">i<span class="tooltip">Si llegas a pagar más de esta cantidad tu comunidad autónoma deberá devolverte la diferencia en el plazo de seis meses</span></span></span>
           <span class="detail-value" id="res-tope">—</span>
         </div>
       </div>
 
 
       <button class="btn-reiniciar" id="btn-reiniciar">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10a7 7 0 107-7" stroke-linecap="round"/><path d="M3 4v6h6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Calcular de nuevo
       </button>
     </section>
