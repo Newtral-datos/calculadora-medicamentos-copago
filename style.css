@@ -430,6 +430,89 @@ select:focus {
   pointer-events: none;
 }
 
+/* ── Search / Autocomplete ─────────────────────── */
+.search-wrap {
+  position: relative;
+}
+
+.search-wrap input[type="text"] {
+  width: 100%;
+  padding: 0.7rem 0.9rem 0.7rem 2.4rem;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 400;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-wrap input[type="text"]::placeholder {
+  color: var(--text-dim);
+}
+
+.search-wrap input[type="text"]:focus {
+  outline: none;
+  border-color: var(--mint);
+  box-shadow: 0 0 0 3px var(--mint-glow);
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1.5px solid var(--mint);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  list-style: none;
+  padding: 0.3rem 0;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.suggestions[hidden] { display: none; }
+
+.suggestions li {
+  padding: 0.6rem 0.9rem;
+  font-size: 0.87rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.12s;
+  outline: none;
+}
+
+.suggestions li:hover,
+.suggestions li:focus {
+  background: var(--mint-soft);
+}
+
+.suggestions li mark {
+  background: transparent;
+  color: var(--mint-dark);
+  font-weight: 700;
+}
+
+.suggestions li.no-results {
+  color: var(--text-dim);
+  font-style: italic;
+  cursor: default;
+  pointer-events: none;
+}
+
 /* ── Botón calcular ────────────────────────────── */
 .btn-calcular {
   width: 100%;

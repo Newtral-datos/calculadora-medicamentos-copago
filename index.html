@@ -96,15 +96,15 @@
       </div>
       <h2>Selecciona el medicamento</h2>
 
-      <div class="select-group">
+      <div class="select-group" id="grupo-principio">
         <label class="select-label" for="principio-activo">Principio activo</label>
-        <div class="select-wrap">
-          <select id="principio-activo">
-            <option value="">— Selecciona —</option>
-            <option value="PARACETAMOL">Paracetamol</option>
-            <option value="IBUPROFENO">Ibuprofeno</option>
-          </select>
-          <svg class="select-arrow" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8.5" cy="8.5" r="5.75"/>
+            <path d="M13.5 13.5L17 17" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="principio-activo" placeholder="Escribe el principio activo..." autocomplete="off" spellcheck="false" />
+          <ul class="suggestions" id="suggestions" hidden></ul>
         </div>
       </div>
 
@@ -149,6 +149,10 @@
           <span class="detail-value" id="res-medicamento">—</span>
         </div>
         <div class="detail-row">
+          <span class="detail-label">Código Nacional</span>
+          <span class="detail-value" id="res-codigo">—</span>
+        </div>
+        <div class="detail-row">
           <span class="detail-label">PVP del envase</span>
           <span class="detail-value" id="res-pvp">—</span>
         </div>
@@ -170,6 +174,7 @@
 
   </main>
 
+  <script src="medicamentos.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
