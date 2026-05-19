@@ -1,7 +1,3 @@
-// Índices de búsqueda derivados de medicamentos[] (cargado desde medicamentos.js)
-const principios       = [...new Set(medicamentos.map(m => m.principio))].sort();
-const medicamentoNames = [...new Set(medicamentos.map(m => m.medicamento).filter(Boolean))].sort();
-
 let searchMode = 'medicamento';
 
 // ── Tramos ───────────────────────────────────────
@@ -24,7 +20,7 @@ const tramosPensionista = [
 
 // ── Estado ───────────────────────────────────────
 
-const state = { situacion: null, tramo: null, principio: null, producto: null };
+const state = { situacion: null, tramo: null, producto: null, principio: null };
 
 // ── Elementos ────────────────────────────────────
 
@@ -35,11 +31,16 @@ const rentaList = document.getElementById('renta-list');
 
 const inputPA    = document.getElementById('principio-activo');
 const suggsList  = document.getElementById('suggestions');
-const selFormato = document.getElementById('formato');
-const selProd    = document.getElementById('producto');
-const grupoFmt   = document.getElementById('grupo-formato');
-const grupoProd  = document.getElementById('grupo-producto');
 const btnCalc    = document.getElementById('btn-calcular');
+
+const labelBusqueda        = document.getElementById('label-busqueda');
+const labelHintMedicamento = document.getElementById('label-hint-medicamento');
+const labelHintPrincipio   = document.getElementById('label-hint-principio');
+
+const grupoFormato      = document.getElementById('grupo-formato');
+const grupoPresent      = document.getElementById('grupo-presentacion');
+const selFormato        = document.getElementById('sel-formato');
+const selPresentacion   = document.getElementById('sel-presentacion');
 
 // ── Navegación ───────────────────────────────────
 
@@ -89,10 +90,6 @@ function buildRentaList() {
 
 // ── Paso 3: Pills de modo ─────────────────────────
 
-const labelBusqueda      = document.getElementById('label-busqueda');
-const labelHintMedicamento = document.getElementById('label-hint-medicamento');
-const labelHintPrincipio   = document.getElementById('label-hint-principio');
-
 document.querySelectorAll('.mode-pill').forEach(pill => {
   pill.addEventListener('click', () => {
     if (pill.dataset.mode === searchMode) return;
@@ -112,9 +109,12 @@ document.querySelectorAll('.mode-pill').forEach(pill => {
       labelHintPrincipio.hidden   = true;
     }
 
-    inputPA.value   = '';
+    inputPA.value  = '';
+    state.producto = null;
     state.principio = null;
-    resetSelects();
+    grupoFormato.classList.add('hidden');
+    grupoPresent.classList.add('hidden');
+    btnCalc.classList.add('hidden');
     hideSugg();
   });
 });
@@ -130,31 +130,69 @@ function normalize(s) {
 
 function onInput() {
   const q = normalize(inputPA.value.trim());
-  state.principio = null;
-  resetSelects();
+  state.producto = null;
+  btnCalc.classList.add('hidden');
+
+  if (searchMode === 'principio') {
+    state.principio = null;
+    grupoFormato.classList.add('hidden');
+    grupoPresent.classList.add('hidden');
+  }
 
   if (!q) { hideSugg(); return; }
 
-  const pool    = searchMode === 'principio' ? principios : medicamentoNames;
-  const matches = pool
-    .filter(p => normalize(p).includes(q))
-    .sort((a, b) => {
+  if (searchMode === 'principio') {
+    const seen = new Set();
+    const principios = [];
+    for (const m of medicamentos) {
+      if (!m.principio) continue;
+      const np = normalize(m.principio);
+      if (np.includes(q) && !seen.has(m.principio)) {
+        seen.add(m.principio);
+        principios.push(m.principio);
+      }
+    }
+    principios.sort((a, b) => {
       const na = normalize(a), nb = normalize(b);
-      const scoreA = na === q ? 0 : na.startsWith(q) ? 1 : 2;
-      const scoreB = nb === q ? 0 : nb.startsWith(q) ? 1 : 2;
-      return scoreA - scoreB || a.localeCompare(b);
+      const sa = na === q ? 0 : na.startsWith(q) ? 1 : 2;
+      const sb = nb === q ? 0 : nb.startsWith(q) ? 1 : 2;
+      return sa - sb || a.localeCompare(b);
     });
 
-  if (!matches.length) {
-    suggsList.innerHTML = '<li class="no-results">Sin resultados</li>';
-    showSugg();
-    return;
-  }
+    if (!principios.length) {
+      suggsList.innerHTML = '<li class="no-results">Sin resultados</li>';
+      showSugg();
+      return;
+    }
 
-  suggsList.innerHTML = matches
-    .map((p, i) => `<li tabindex="-1" data-value="${p}" data-idx="${i}">${hlMark(toTitleCase(p), q)}</li>`)
-    .join('');
-  showSugg();
+    suggsList.innerHTML = principios
+      .map(p => `<li tabindex="-1" data-principio="${p.replace(/"/g, '&quot;')}">${hlMark(p, q)}</li>`)
+      .join('');
+    showSugg();
+
+  } else {
+    const matches = medicamentos
+      .map((m, i) => ({ m, i }))
+      .filter(({ m }) => m.medicamento && normalize(m.medicamento).includes(q))
+      .sort((a, b) => {
+        const fa = normalize(a.m.medicamento);
+        const fb = normalize(b.m.medicamento);
+        const sa = fa === q ? 0 : fa.startsWith(q) ? 1 : 2;
+        const sb = fb === q ? 0 : fb.startsWith(q) ? 1 : 2;
+        return sa - sb || a.m.nombre.localeCompare(b.m.nombre);
+      });
+
+    if (!matches.length) {
+      suggsList.innerHTML = '<li class="no-results">Sin resultados</li>';
+      showSugg();
+      return;
+    }
+
+    suggsList.innerHTML = matches
+      .map(({ m, i }) => `<li tabindex="-1" data-idx="${i}">${hlMark(toTitleCase(m.nombre), q)}</li>`)
+      .join('');
+    showSugg();
+  }
 }
 
 function hlMark(display, query) {
@@ -183,7 +221,26 @@ suggsList.addEventListener('keydown', e => {
 
 suggsList.addEventListener('click', e => {
   const li = e.target.closest('li:not(.no-results)');
-  if (li) selectPA(li.dataset.value);
+  if (!li) return;
+
+  if (searchMode === 'principio') {
+    const principio = li.dataset.principio;
+    state.principio = principio;
+    inputPA.value   = principio;
+    hideSugg();
+    populateFormatos(principio);
+    grupoFormato.classList.remove('hidden');
+    grupoPresent.classList.add('hidden');
+    selFormato.value = '';
+    selPresentacion.innerHTML = '<option value="">Selecciona la presentación...</option>';
+    btnCalc.classList.add('hidden');
+  } else {
+    const m = medicamentos[parseInt(li.dataset.idx)];
+    state.producto = m;
+    inputPA.value  = toTitleCase(m.nombre);
+    hideSugg();
+    btnCalc.classList.remove('hidden');
+  }
 });
 
 document.addEventListener('click', e => {
@@ -193,46 +250,49 @@ document.addEventListener('click', e => {
 function showSugg() { suggsList.hidden = false; }
 function hideSugg() { suggsList.hidden = true; }
 
-function selectPA(value) {
-  state.principio = value;
-  inputPA.value   = toTitleCase(value);
-  hideSugg();
+// ── Paso 3: Formato y Presentación (modo principio) ──
 
-  const pool = searchMode === 'principio'
-    ? medicamentos.filter(m => m.principio === value)
-    : medicamentos.filter(m => m.medicamento === value);
-
-  const formatos = [...new Set(pool.map(m => m.formato))];
-  selFormato.innerHTML = '<option value="">— Selecciona —</option>' +
+function populateFormatos(principio) {
+  const formatos = [...new Set(
+    medicamentos
+      .filter(m => m.principio === principio)
+      .map(m => m.formato)
+      .filter(Boolean)
+  )].sort();
+  selFormato.innerHTML = '<option value="">Selecciona el formato...</option>' +
     formatos.map(f => `<option value="${f}">${f}</option>`).join('');
-  grupoFmt.classList.remove('hidden');
 }
 
-// ── Formato ───────────────────────────────────────
+function populatePresentaciones(principio, formato) {
+  const productos = medicamentos
+    .map((m, i) => ({ m, i }))
+    .filter(({ m }) => m.principio === principio && m.formato === formato)
+    .sort((a, b) => a.m.nombre.localeCompare(b.m.nombre));
+  selPresentacion.innerHTML = '<option value="">Selecciona la presentación...</option>' +
+    productos.map(({ m, i }) => `<option value="${i}">${toTitleCase(m.nombre)}</option>`).join('');
+}
 
 selFormato.addEventListener('change', () => {
-  const fmt = selFormato.value;
-  selProd.innerHTML = '<option value="">— Selecciona —</option>';
-  grupoProd.classList.add('hidden');
-  btnCalc.classList.add('hidden');
+  const formato = selFormato.value;
   state.producto = null;
-  if (!fmt) return;
-
-  const prods = searchMode === 'principio'
-    ? medicamentos.filter(m => m.principio   === state.principio && m.formato === fmt)
-    : medicamentos.filter(m => m.medicamento === state.principio && m.formato === fmt);
-  selProd.innerHTML = '<option value="">— Selecciona —</option>' +
-    prods.map(m => {
-      const idx = medicamentos.indexOf(m);
-      return `<option value="${idx}">${m.nombre}</option>`;
-    }).join('');
-  grupoProd.classList.remove('hidden');
+  btnCalc.classList.add('hidden');
+  if (!formato) {
+    grupoPresent.classList.add('hidden');
+    return;
+  }
+  populatePresentaciones(state.principio, formato);
+  grupoPresent.classList.remove('hidden');
+  selPresentacion.value = '';
 });
 
-selProd.addEventListener('change', () => {
-  const idx = parseInt(selProd.value);
-  if (isNaN(idx)) { btnCalc.classList.add('hidden'); return; }
-  state.producto = medicamentos[idx];
+selPresentacion.addEventListener('change', () => {
+  const idx = selPresentacion.value;
+  if (!idx) {
+    state.producto = null;
+    btnCalc.classList.add('hidden');
+    return;
+  }
+  state.producto = medicamentos[parseInt(idx)];
   btnCalc.classList.remove('hidden');
 });
 
@@ -274,10 +334,13 @@ document.querySelectorAll('.btn-back').forEach(btn => {
       rentaList.querySelectorAll('.renta-item').forEach(r => r.classList.remove('selected'));
     }
     if (target === 3) {
-      state.principio = null;
       state.producto  = null;
+      state.principio = null;
       inputPA.value   = '';
-      resetSelects();
+      btnCalc.classList.add('hidden');
+      grupoFormato.classList.add('hidden');
+      grupoPresent.classList.add('hidden');
+      hideSugg();
     }
     goToStep(target);
   });
@@ -286,15 +349,18 @@ document.querySelectorAll('.btn-back').forEach(btn => {
 // ── Reiniciar ─────────────────────────────────────
 
 document.getElementById('btn-reiniciar').addEventListener('click', () => {
-  state.situacion = null;
-  state.tramo     = null;
-  state.principio = null;
-  state.producto  = null;
+  state.situacion  = null;
+  state.tramo      = null;
+  state.producto   = null;
+  state.principio  = null;
   document.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
   document.querySelectorAll('.choice-card input').forEach(r => r.checked = false);
   rentaList.innerHTML = '';
   inputPA.value = '';
-  resetSelects();
+  btnCalc.classList.add('hidden');
+  grupoFormato.classList.add('hidden');
+  grupoPresent.classList.add('hidden');
+  hideSugg();
   searchMode = 'medicamento';
   document.querySelectorAll('.mode-pill').forEach(p => p.classList.toggle('active', p.dataset.mode === 'medicamento'));
   labelBusqueda.firstChild.textContent = 'Medicamento ';
@@ -313,13 +379,4 @@ function toTitleCase(s) {
 
 function fmt2(n) {
   return n.toFixed(2).replace('.', ',');
-}
-
-function resetSelects() {
-  selFormato.innerHTML = '<option value="">— Selecciona —</option>';
-  selProd.innerHTML    = '<option value="">— Selecciona —</option>';
-  grupoFmt.classList.add('hidden');
-  grupoProd.classList.add('hidden');
-  btnCalc.classList.add('hidden');
-  state.producto = null;
 }
