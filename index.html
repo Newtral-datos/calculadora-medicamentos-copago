@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Copago SNS</title>
+  <link rel="icon" type="image/png" href="logo-newtral.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="noise"></div>
+
+  <main class="container">
+
+    <header class="hero">
+      <h1>Calculadora<br /><em>de copago</em></h1>
+      <p class="hero-sub">Descubre tu aportación real al coste del medicamento<br /><i>(No almacenamos tus datos)</i></p>
+    </header>
+
+    <!-- Indicador de progreso -->
+    <div class="progress-track" id="progress-track">
+      <div class="progress-line"><div class="progress-fill" id="progress-fill"></div></div>
+      <button class="step-dot active" data-step="1" aria-label="Paso 1">
+        <span class="dot-inner">1</span>
+        <span class="dot-label">Situación</span>
+      </button>
+      <button class="step-dot" data-step="2" aria-label="Paso 2">
+        <span class="dot-inner">2</span>
+        <span class="dot-label">Renta</span>
+      </button>
+      <button class="step-dot" data-step="3" aria-label="Paso 3">
+        <span class="dot-inner">3</span>
+        <span class="dot-label">Medicamento</span>
+      </button>
+      <button class="step-dot" data-step="4" aria-label="Paso 4">
+        <span class="dot-inner">4</span>
+        <span class="dot-label">Resultado</span>
+      </button>
+    </div>
+
+    <!-- Step 1: Situación -->
+    <section class="card step-card active" id="step-1">
+      <div class="card-label">01 / Situación laboral</div>
+      <h2>¿Cuál es tu situación?</h2>
+      <div class="choice-grid">
+        <label class="choice-card" data-value="activo">
+          <input type="radio" name="situacion" value="activo" hidden />
+          <div class="choice-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+          </div>
+          <span class="choice-title">Trabajador/a activo/a</span>
+          <span class="choice-desc">Ocupado o en paro con subsidio</span>
+        </label>
+        <label class="choice-card" data-value="pensionista">
+          <input type="radio" name="situacion" value="pensionista" hidden />
+          <div class="choice-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <span class="choice-title">Pensionista</span>
+          <span class="choice-desc">Jubilado o pensión contributiva</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Step 2: Renta -->
+    <section class="card step-card" id="step-2">
+      <div class="card-top">
+        <div class="card-label">02 / Tramo de renta</div>
+        <button class="btn-back" data-target="1">← Volver</button>
+      </div>
+      <h2>¿Cuál es tu renta anual?</h2>
+      <div class="renta-list" id="renta-list"></div>
+    </section>
+
+    <!-- Step 3: Medicamento -->
+    <section class="card step-card" id="step-3">
+      <div class="card-top">
+        <div class="card-label">03 / Medicamento</div>
+        <button class="btn-back" data-target="2">← Volver</button>
+      </div>
+      <h2>Selecciona el medicamento</h2>
+
+      <div class="select-group">
+        <label class="select-label" for="principio-activo">Principio activo</label>
+        <div class="select-wrap">
+          <select id="principio-activo">
+            <option value="">— Selecciona —</option>
+            <option value="PARACETAMOL">Paracetamol</option>
+            <option value="IBUPROFENO">Ibuprofeno</option>
+          </select>
+          <svg class="select-arrow" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <div class="select-group hidden" id="grupo-formato">
+        <label class="select-label" for="formato">Formato</label>
+        <div class="select-wrap">
+          <select id="formato">
+            <option value="">— Selecciona —</option>
+          </select>
+          <svg class="select-arrow" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <div class="select-group hidden" id="grupo-producto">
+        <label class="select-label" for="producto">Presentación</label>
+        <div class="select-wrap">
+          <select id="producto">
+            <option value="">— Selecciona —</option>
+          </select>
+          <svg class="select-arrow" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <button class="btn-calcular hidden" id="btn-calcular">Calcular copago</button>
+    </section>
+
+    <!-- Step 4: Resultado -->
+    <section class="card step-card result-card" id="step-4">
+      <div class="card-top">
+        <div class="card-label">04 / Tu copago</div>
+        <button class="btn-back" data-target="3">← Volver</button>
+      </div>
+
+      <div class="result-hero">
+        <span class="result-eyebrow">Tu aportación por envase</span>
+        <span class="result-amount" id="res-aportacion">—</span>
+      </div>
+
+      <div class="result-details">
+        <div class="detail-row">
+          <span class="detail-label">Medicamento</span>
+          <span class="detail-value" id="res-medicamento">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">PVP del envase</span>
+          <span class="detail-value" id="res-pvp">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">% de aportación</span>
+          <span class="detail-value" id="res-pct">—</span>
+        </div>
+        <div class="detail-row" id="res-tope-row">
+          <span class="detail-label">Límite mensual</span>
+          <span class="detail-value" id="res-tope">—</span>
+        </div>
+      </div>
+
+
+      <button class="btn-reiniciar" id="btn-reiniciar">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10a7 7 0 107-7" stroke-linecap="round"/><path d="M3 4v6h6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Calcular de nuevo
+      </button>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
