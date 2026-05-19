@@ -397,6 +397,14 @@ h1 em {
   margin-bottom: 0.45rem;
 }
 
+.label-hint {
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-dim);
+}
+
 .select-wrap { position: relative; }
 
 select {
