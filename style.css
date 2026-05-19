@@ -438,6 +438,39 @@ select:focus {
   pointer-events: none;
 }
 
+/* ── Mode pills ────────────────────────────────── */
+.mode-pills {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.mode-pill {
+  flex: 1;
+  padding: 0.45rem 0.75rem;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.mode-pill.active {
+  background: var(--mint-soft);
+  border-color: var(--mint);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.mode-pill:hover:not(.active) {
+  border-color: var(--mint);
+  color: var(--text);
+}
+
 /* ── Search / Autocomplete ─────────────────────── */
 .search-wrap {
   position: relative;

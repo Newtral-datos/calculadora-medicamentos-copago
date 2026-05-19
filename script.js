@@ -1,5 +1,8 @@
-// principios se deriva de medicamentos[] cargado desde medicamentos.js
-const principios = [...new Set(medicamentos.map(m => m.principio))].sort();
+// Índices de búsqueda derivados de medicamentos[] (cargado desde medicamentos.js)
+const principios       = [...new Set(medicamentos.map(m => m.principio))].sort();
+const medicamentoNames = [...new Set(medicamentos.map(m => m.medicamento).filter(Boolean))].sort();
+
+let searchMode = 'medicamento';
 
 // ── Tramos ───────────────────────────────────────
 
@@ -84,7 +87,39 @@ function buildRentaList() {
   });
 }
 
-// ── Paso 3: Autocomplete principio activo ─────────
+// ── Paso 3: Pills de modo ─────────────────────────
+
+const labelBusqueda      = document.getElementById('label-busqueda');
+const labelHintMedicamento = document.getElementById('label-hint-medicamento');
+const labelHintPrincipio   = document.getElementById('label-hint-principio');
+
+document.querySelectorAll('.mode-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    if (pill.dataset.mode === searchMode) return;
+    document.querySelectorAll('.mode-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    searchMode = pill.dataset.mode;
+
+    if (searchMode === 'principio') {
+      labelBusqueda.firstChild.textContent = 'Principio activo ';
+      inputPA.placeholder = 'Escribe el principio activo...';
+      labelHintPrincipio.hidden   = false;
+      labelHintMedicamento.hidden = true;
+    } else {
+      labelBusqueda.firstChild.textContent = 'Medicamento ';
+      inputPA.placeholder = 'Escribe el nombre del medicamento...';
+      labelHintMedicamento.hidden = false;
+      labelHintPrincipio.hidden   = true;
+    }
+
+    inputPA.value   = '';
+    state.principio = null;
+    resetSelects();
+    hideSugg();
+  });
+});
+
+// ── Paso 3: Autocomplete ──────────────────────────
 
 inputPA.addEventListener('input', onInput);
 inputPA.addEventListener('keydown', onKeydown);
@@ -96,7 +131,8 @@ function onInput() {
 
   if (!q) { hideSugg(); return; }
 
-  const matches = principios.filter(p => p.includes(q)).slice(0, 8);
+  const pool    = searchMode === 'principio' ? principios : medicamentoNames;
+  const matches = pool.filter(p => p.toUpperCase().includes(q)).slice(0, 8);
 
   if (!matches.length) {
     suggsList.innerHTML = '<li class="no-results">Sin resultados</li>';
@@ -146,14 +182,16 @@ document.addEventListener('click', e => {
 function showSugg() { suggsList.hidden = false; }
 function hideSugg() { suggsList.hidden = true; }
 
-function selectPA(pa) {
-  state.principio = pa;
-  inputPA.value   = toTitleCase(pa);
+function selectPA(value) {
+  state.principio = value;
+  inputPA.value   = toTitleCase(value);
   hideSugg();
 
-  const formatos = [...new Set(
-    medicamentos.filter(m => m.principio === pa).map(m => m.formato)
-  )];
+  const pool = searchMode === 'principio'
+    ? medicamentos.filter(m => m.principio === value)
+    : medicamentos.filter(m => m.medicamento === value);
+
+  const formatos = [...new Set(pool.map(m => m.formato))];
   selFormato.innerHTML = '<option value="">— Selecciona —</option>' +
     formatos.map(f => `<option value="${f}">${f}</option>`).join('');
   grupoFmt.classList.remove('hidden');
@@ -169,7 +207,9 @@ selFormato.addEventListener('change', () => {
   state.producto = null;
   if (!fmt) return;
 
-  const prods = medicamentos.filter(m => m.principio === state.principio && m.formato === fmt);
+  const prods = searchMode === 'principio'
+    ? medicamentos.filter(m => m.principio   === state.principio && m.formato === fmt)
+    : medicamentos.filter(m => m.medicamento === state.principio && m.formato === fmt);
   selProd.innerHTML = '<option value="">— Selecciona —</option>' +
     prods.map(m => {
       const idx = medicamentos.indexOf(m);
@@ -244,6 +284,12 @@ document.getElementById('btn-reiniciar').addEventListener('click', () => {
   rentaList.innerHTML = '';
   inputPA.value = '';
   resetSelects();
+  searchMode = 'medicamento';
+  document.querySelectorAll('.mode-pill').forEach(p => p.classList.toggle('active', p.dataset.mode === 'medicamento'));
+  labelBusqueda.firstChild.textContent = 'Medicamento ';
+  inputPA.placeholder = 'Escribe el nombre del medicamento...';
+  labelHintMedicamento.hidden = false;
+  labelHintPrincipio.hidden   = true;
   goToStep(1);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
