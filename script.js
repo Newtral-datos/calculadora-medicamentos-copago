@@ -124,15 +124,26 @@ document.querySelectorAll('.mode-pill').forEach(pill => {
 inputPA.addEventListener('input', onInput);
 inputPA.addEventListener('keydown', onKeydown);
 
+function normalize(s) {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+}
+
 function onInput() {
-  const q = inputPA.value.trim().toUpperCase();
+  const q = normalize(inputPA.value.trim());
   state.principio = null;
   resetSelects();
 
   if (!q) { hideSugg(); return; }
 
   const pool    = searchMode === 'principio' ? principios : medicamentoNames;
-  const matches = pool.filter(p => p.toUpperCase().includes(q)).slice(0, 8);
+  const matches = pool
+    .filter(p => normalize(p).includes(q))
+    .sort((a, b) => {
+      const na = normalize(a), nb = normalize(b);
+      const scoreA = na === q ? 0 : na.startsWith(q) ? 1 : 2;
+      const scoreB = nb === q ? 0 : nb.startsWith(q) ? 1 : 2;
+      return scoreA - scoreB || a.localeCompare(b);
+    });
 
   if (!matches.length) {
     suggsList.innerHTML = '<li class="no-results">Sin resultados</li>';
@@ -147,7 +158,7 @@ function onInput() {
 }
 
 function hlMark(display, query) {
-  const idx = display.toUpperCase().indexOf(query);
+  const idx = normalize(display).indexOf(query);
   if (idx < 0) return display;
   return display.slice(0, idx) +
     `<mark>${display.slice(idx, idx + query.length)}</mark>` +
