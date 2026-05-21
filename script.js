@@ -307,7 +307,7 @@ btnCalc.addEventListener('click', () => { mostrarResultado(); goToStep(4); });
 function mostrarResultado() {
   const { producto, tramo } = state;
   const aportacion = producto.pvp * tramo.pct / 100;
-  document.getElementById('res-aportacion').textContent = fmt2(aportacion) + ' €';
+  document.getElementById('res-aportacion').textContent = fmt2(aportacion) + ' €*';
   document.getElementById('res-medicamento').textContent = producto.nombre;
   document.getElementById('res-codigo').textContent = producto.codigo || '—';
   document.getElementById('res-pvp').textContent = fmt2(producto.pvp) + ' €';
