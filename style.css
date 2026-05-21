@@ -35,7 +35,10 @@ body {
   padding: 3rem 1.25rem 5rem;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  scrollbar-width: none;
 }
+
+body::-webkit-scrollbar { display: none; }
 
 .noise { display: none; }
 
