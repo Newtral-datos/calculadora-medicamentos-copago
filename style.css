@@ -524,7 +524,10 @@ select:focus {
   z-index: 100;
   overflow-y: auto;
   max-height: 260px;
+  scrollbar-width: none;
 }
+
+.suggestions::-webkit-scrollbar { display: none; }
 
 .suggestions[hidden] { display: none; }
 
