@@ -147,7 +147,8 @@ function onInput() {
     for (const m of medicamentos) {
       if (!m.principio) continue;
       const np = normalize(m.principio);
-      if (np.includes(q) && !seen.has(m.principio)) {
+      const nn = m.nombre ? normalize(m.nombre) : '';
+      if ((np.includes(q) || nn.includes(q)) && !seen.has(m.principio)) {
         seen.add(m.principio);
         principios.push(m.principio);
       }
@@ -193,7 +194,7 @@ function onInput() {
     }
 
     suggsList.innerHTML = matches
-      .map(({ m, i }) => `<li tabindex="-1" data-idx="${i}">${hlMark(toTitleCase(m.nombre), q)}</li>`)
+      .map(({ m, i }) => `<li tabindex="-1" data-idx="${i}">${hlMark(toTitleCase(m.medicamento || m.nombre), q)}</li>`)
       .join('');
     showSugg();
   }
@@ -241,7 +242,7 @@ suggsList.addEventListener('click', e => {
   } else {
     const m = medicamentos[parseInt(li.dataset.idx)];
     state.producto = m;
-    inputPA.value  = toTitleCase(m.nombre);
+    inputPA.value  = toTitleCase(m.medicamento || m.nombre);
     hideSugg();
     btnCalc.classList.remove('hidden');
   }
@@ -273,7 +274,7 @@ function populatePresentaciones(principio, formato) {
     .filter(({ m }) => m.principio === principio && m.formato === formato)
     .sort((a, b) => a.m.nombre.localeCompare(b.m.nombre));
   selPresentacion.innerHTML = '<option value="">Selecciona la presentación...</option>' +
-    productos.map(({ m, i }) => `<option value="${i}">${toTitleCase(m.nombre)}</option>`).join('');
+    productos.map(({ m, i }) => `<option value="${i}">${toTitleCase(m.medicamento || m.nombre)}</option>`).join('');
 }
 
 selFormato.addEventListener('change', () => {
