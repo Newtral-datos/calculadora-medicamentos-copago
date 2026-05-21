@@ -385,3 +385,9 @@ function toTitleCase(s) {
 function fmt2(n) {
   return n.toFixed(2).replace('.', ',');
 }
+
+// ── Resize iframe en la página padre ─────────────
+const resizeObserver = new ResizeObserver(() => {
+  window.parent.postMessage({ iframeHeight: document.body.scrollHeight }, '*');
+});
+resizeObserver.observe(document.body);
